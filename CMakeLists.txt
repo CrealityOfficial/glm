@@ -153,54 +153,60 @@ endif()
 include_directories("${PROJECT_SOURCE_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/test/external")
 
-add_subdirectory(glm)
-add_subdirectory(test)
-
-write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/glmConfigVersion.cmake"
-    VERSION ${GLM_VERSION}
-    COMPATIBILITY AnyNewerVersion
-)
-
-# build tree package config
-configure_file(
-    cmake/glmBuildConfig.cmake.in
-    glmConfig.cmake
-    @ONLY
-)
-
-# install tree package config
-configure_package_config_file(
-    cmake/glmConfig.cmake.in
-    ${GLM_INSTALL_CONFIGDIR}/glmConfig.cmake
-    INSTALL_DESTINATION ${GLM_INSTALL_CONFIGDIR}
-    PATH_VARS CMAKE_INSTALL_INCLUDEDIR
-    NO_CHECK_REQUIRED_COMPONENTS_MACRO
-)
-
-if (NOT CMAKE_VERSION VERSION_LESS "3.0")
-    add_library(glm INTERFACE)
-    target_include_directories(glm INTERFACE
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    )
-    install(TARGETS glm EXPORT glmTargets)
-
-    export(
-        EXPORT glmTargets
-        FILE "${CMAKE_CURRENT_BINARY_DIR}/glmTargets.cmake"
-    )
-    
-    install(
-        EXPORT glmTargets FILE glmTargets.cmake
-        DESTINATION ${GLM_INSTALL_CONFIGDIR}
-    )
+if(CC_INSTALL_GLM)
+	__install_directory_specif(${CMAKE_CURRENT_SOURCE_DIR}/ glm)
 endif()
 
-# build pkg-config file
-configure_file(
-    "./cmake/glm.pc.in"
-    "glm.pc"
-    @ONLY
-)
+if(GLM_STATIC_LIBRARY_ENABLE)
+	add_subdirectory(glm)
+	add_subdirectory(test)
+	
+	write_basic_package_version_file(
+		"${CMAKE_CURRENT_BINARY_DIR}/glmConfigVersion.cmake"
+		VERSION ${GLM_VERSION}
+		COMPATIBILITY AnyNewerVersion
+	)
+	
+	# build tree package config
+	configure_file(
+		cmake/glmBuildConfig.cmake.in
+		glmConfig.cmake
+		@ONLY
+	)
+	
+	# install tree package config
+	configure_package_config_file(
+		cmake/glmConfig.cmake.in
+		${GLM_INSTALL_CONFIGDIR}/glmConfig.cmake
+		INSTALL_DESTINATION ${GLM_INSTALL_CONFIGDIR}
+		PATH_VARS CMAKE_INSTALL_INCLUDEDIR
+		NO_CHECK_REQUIRED_COMPONENTS_MACRO
+	)
+	
+	if (NOT CMAKE_VERSION VERSION_LESS "3.0")
+		add_library(glm INTERFACE)
+		target_include_directories(glm INTERFACE
+			$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+		)
+		install(TARGETS glm EXPORT glmTargets)
+	
+		export(
+			EXPORT glmTargets
+			FILE "${CMAKE_CURRENT_BINARY_DIR}/glmTargets.cmake"
+		)
+		
+		install(
+			EXPORT glmTargets FILE glmTargets.cmake
+			DESTINATION ${GLM_INSTALL_CONFIGDIR}
+		)
+	endif()
+	
+	# build pkg-config file
+	configure_file(
+		"./cmake/glm.pc.in"
+		"glm.pc"
+		@ONLY
+	)
+endif()
 
